@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Plus, TrendingUp, TrendingDown, CheckCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { createGroupService } from '@/services/group.service';
 import { createAuthService } from '@/services/auth.service';
@@ -33,7 +34,10 @@ export default async function DashboardPage() {
           <p className="text-gray-500 mt-1">Acá están tus grupos activos</p>
         </div>
         <Link href="/groups/new">
-          <Button>Nuevo grupo</Button>
+          <Button>
+            <Plus className="h-4 w-4 mr-1.5" />
+            Nuevo grupo
+          </Button>
         </Link>
       </div>
 
@@ -56,15 +60,17 @@ export default async function DashboardPage() {
                 {group.description && (
                   <p className="text-sm text-gray-500 mb-3 line-clamp-2">{group.description}</p>
                 )}
-                <div className={`text-sm font-medium mt-auto ${
+                <div className={`flex items-center gap-1.5 text-sm font-medium mt-auto ${
                   balance.netAmount > 0 ? 'text-green-600' :
                   balance.netAmount < 0 ? 'text-red-600' : 'text-gray-500'
                 }`}>
-                  {balance.netAmount > 0
-                    ? `Te deben ${formatCurrency(balance.netAmount)}`
-                    : balance.netAmount < 0
-                    ? `Debés ${formatCurrency(Math.abs(balance.netAmount))}`
-                    : 'Estás al día'}
+                  {balance.netAmount > 0 ? (
+                    <><TrendingUp className="h-4 w-4" />Te deben {formatCurrency(balance.netAmount)}</>
+                  ) : balance.netAmount < 0 ? (
+                    <><TrendingDown className="h-4 w-4" />Debés {formatCurrency(Math.abs(balance.netAmount))}</>
+                  ) : (
+                    <><CheckCircle className="h-4 w-4" />Estás al día</>
+                  )}
                 </div>
               </Card>
             </Link>

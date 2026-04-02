@@ -9,6 +9,8 @@ import { logger } from '@/lib/logger';
 import type { ActionResponse } from './types';
 import type { Expense } from '@/entities/expense.entity';
 
+const log = logger.action('expense');
+
 export async function createExpense(
   _prevState: ActionResponse<Expense>,
   formData: FormData
@@ -17,7 +19,7 @@ export async function createExpense(
   const amount = parseFloat(formData.get('amount') as string);
   const participants = formData.getAll('participants') as string[];
 
-  logger.action('createExpense', 'Started', { groupId, amount });
+  log('createExpense', 'Started', { groupId, amount });
 
   const parsed = createExpenseSchema.safeParse({
     group_id: groupId,
@@ -39,18 +41,18 @@ export async function createExpense(
 
     const expenseService = createExpenseService(db);
     const expense = await expenseService.create(parsed.data, user.id);
-    logger.action('createExpense', 'Success', { expenseId: expense.id });
+    log('createExpense', 'Success', { expenseId: expense.id });
     revalidatePath(`/groups/${groupId}`);
     redirect(`/groups/${groupId}`);
   } catch (error) {
     if ((error as { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) throw error;
-    logger.error('createExpense', 'Failed', { error: (error as Error).message });
+    log.error('createExpense', 'Failed', { error: (error as Error).message });
     return { success: false, error: 'Error al crear el gasto' };
   }
 }
 
 export async function deleteExpense(expenseId: string, groupId: string): Promise<ActionResponse> {
-  logger.action('deleteExpense', 'Started', { expenseId });
+  log('deleteExpense', 'Started', { expenseId });
   try {
     const db = await createClient();
     const { data: { user } } = await db.auth.getUser();
@@ -58,11 +60,11 @@ export async function deleteExpense(expenseId: string, groupId: string): Promise
 
     const expenseService = createExpenseService(db);
     await expenseService.delete(expenseId, groupId, user.id);
-    logger.action('deleteExpense', 'Success', { expenseId });
+    log('deleteExpense', 'Success', { expenseId });
     revalidatePath(`/groups/${groupId}`);
     return { success: true };
   } catch (error) {
-    logger.error('deleteExpense', 'Failed', { error: (error as Error).message });
+    log.error('deleteExpense', 'Failed', { error: (error as Error).message });
     return { success: false, error: 'Error al eliminar el gasto' };
   }
 }

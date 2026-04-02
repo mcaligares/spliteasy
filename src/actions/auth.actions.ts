@@ -7,68 +7,68 @@ import { authConfig } from '@/config/auth.config';
 import { logger } from '@/lib/logger';
 import type { ActionResponse } from './types';
 
-export async function signUp(
+const log = logger.action('auth');
+
+export async function sendOtp(
   _prevState: ActionResponse,
   formData: FormData
 ): Promise<ActionResponse> {
   const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-  const name = formData.get('name') as string;
+  const name = formData.get('name') as string | null;
 
-  logger.action('signUp', 'Started', { email: email?.split('@')[0] });
+  log('sendOtp', 'Started', { email: email?.split('@')[0] });
 
-  if (!email || !password || !name) {
-    return { success: false, error: 'Todos los campos son requeridos' };
+  if (!email) {
+    return { success: false, error: 'El email es requerido' };
   }
 
   try {
     const db = await createClient();
     const authService = createAuthService(db);
-    await authService.signUp(email, password, name);
-    logger.action('signUp', 'Success');
+    await authService.sendOtp(email, name ? { name } : undefined);
+    log('sendOtp', 'Success');
+    return { success: true };
   } catch (error) {
-    logger.error('signUp', 'Failed', { error: (error as Error).message });
-    return { success: false, error: 'Error al registrar usuario. El email puede estar en uso.' };
+    log.error('sendOtp', 'Failed', { error: (error as Error).message });
+    return { success: false, error: 'Error al enviar el código. Intentá de nuevo.' };
   }
-
-  redirect(authConfig.redirects.afterSignup);
 }
 
-export async function signIn(
+export async function verifyOtp(
   _prevState: ActionResponse,
   formData: FormData
 ): Promise<ActionResponse> {
   const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
+  const token = formData.get('token') as string;
 
-  logger.action('signIn', 'Started', { email: email?.split('@')[0] });
+  log('verifyOtp', 'Started', { email: email?.split('@')[0] });
 
-  if (!email || !password) {
-    return { success: false, error: 'Email y contraseña son requeridos' };
+  if (!email || !token) {
+    return { success: false, error: 'El email y el código son requeridos' };
   }
 
   try {
     const db = await createClient();
     const authService = createAuthService(db);
-    await authService.signIn(email, password);
-    logger.action('signIn', 'Success');
+    await authService.verifyOtp(email, token);
+    log('verifyOtp', 'Success');
   } catch (error) {
-    logger.error('signIn', 'Failed', { error: (error as Error).message });
-    return { success: false, error: 'Credenciales inválidas' };
+    log.error('verifyOtp', 'Failed', { error: (error as Error).message });
+    return { success: false, error: 'Código inválido o expirado' };
   }
 
   redirect(authConfig.redirects.afterLogin);
 }
 
 export async function signOut(): Promise<void> {
-  logger.action('signOut', 'Started');
+  log('signOut', 'Started');
   try {
     const db = await createClient();
     const authService = createAuthService(db);
     await authService.signOut();
-    logger.action('signOut', 'Success');
+    log('signOut', 'Success');
   } catch (error) {
-    logger.error('signOut', 'Failed', { error: (error as Error).message });
+    log.error('signOut', 'Failed', { error: (error as Error).message });
   }
   redirect(authConfig.redirects.afterLogout);
 }

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ArrowLeft, Activity, Plus, Shield, User } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { createAuthService } from '@/services/auth.service';
 import { createGroupService } from '@/services/group.service';
@@ -42,24 +43,31 @@ export default async function GroupPage({ params }: GroupPageProps) {
   const isAdmin = members.find((m) => m.user_id === user.id)?.role === 'admin';
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <Link href="/groups" className="text-sm text-gray-500 hover:text-gray-700">
-            ← Mis grupos
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <Link href="/groups" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700">
+            <ArrowLeft className="h-4 w-4" />
+            Mis grupos
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">{group.name}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mt-1 truncate">{group.name}</h1>
           {group.description && (
             <p className="text-gray-500 mt-1">{group.description}</p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <Link href={`/groups/${groupId}/activity`}>
-            <Button variant="secondary" size="sm">Actividad</Button>
+            <Button variant="secondary" size="sm">
+              <Activity className="h-4 w-4 sm:mr-1.5" />
+              <span className="hidden sm:inline">Actividad</span>
+            </Button>
           </Link>
           <Link href={`/groups/${groupId}/expenses/new`}>
-            <Button size="sm">+ Gasto</Button>
+            <Button size="sm">
+              <Plus className="h-4 w-4 sm:mr-1.5" />
+              <span className="hidden sm:inline">Gasto</span>
+            </Button>
           </Link>
         </div>
       </div>
@@ -92,14 +100,18 @@ export default async function GroupPage({ params }: GroupPageProps) {
             </h3>
             <div className="space-y-2 mb-4">
               {members.map((member) => (
-                <div key={member.id} className="flex items-center justify-between">
+                <div key={member.id} className="flex items-center justify-between min-h-[40px]">
                   <span className="text-sm text-gray-700">{member.user.name}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
                     member.role === 'admin'
                       ? 'bg-indigo-100 text-indigo-700'
                       : 'bg-gray-100 text-gray-600'
                   }`}>
-                    {member.role === 'admin' ? 'Admin' : 'Miembro'}
+                    {member.role === 'admin' ? (
+                      <><Shield className="h-3 w-3" />Admin</>
+                    ) : (
+                      <><User className="h-3 w-3" />Miembro</>
+                    )}
                   </span>
                 </div>
               ))}

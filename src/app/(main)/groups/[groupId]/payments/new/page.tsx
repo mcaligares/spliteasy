@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { createAuthService } from '@/services/auth.service';
 import { createGroupService } from '@/services/group.service';
@@ -33,8 +34,9 @@ export default async function NewPaymentPage({ params, searchParams }: PageProps
   return (
     <div className="max-w-lg mx-auto">
       <div className="mb-6">
-        <a href={`/groups/${groupId}`} className="text-sm text-gray-500 hover:text-gray-700">
-          ← Volver al grupo
+        <a href={`/groups/${groupId}`} className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700">
+          <ArrowLeft className="h-4 w-4" />
+          Volver al grupo
         </a>
         <h1 className="text-2xl font-bold text-gray-900 mt-2">Registrar pago</h1>
         <p className="text-gray-500">{group.name}</p>

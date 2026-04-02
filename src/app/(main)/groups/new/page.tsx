@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import Link from 'next/link';
+import { ArrowLeft, X, Check } from 'lucide-react';
 import { createGroup } from '@/actions/group.actions';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -18,8 +19,9 @@ export default function NewGroupPage() {
   return (
     <div className="max-w-lg mx-auto">
       <div className="mb-6">
-        <Link href="/groups" className="text-sm text-gray-500 hover:text-gray-700">
-          ← Volver a grupos
+        <Link href="/groups" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700">
+          <ArrowLeft className="h-4 w-4" />
+          Volver a grupos
         </Link>
         <h1 className="text-2xl font-bold text-gray-900 mt-2">Nuevo grupo</h1>
       </div>
@@ -40,15 +42,19 @@ export default function NewGroupPage() {
               id="description"
               name="description"
               rows={3}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="Descripción opcional del grupo"
             />
           </div>
           <div className="flex gap-3 pt-2">
             <Link href="/groups" className="flex-1">
-              <Button variant="secondary" className="w-full">Cancelar</Button>
+              <Button variant="secondary" className="w-full">
+                <X className="h-4 w-4 mr-1.5" />
+                Cancelar
+              </Button>
             </Link>
             <Button type="submit" loading={isPending} className="flex-1">
+              <Check className="h-4 w-4 mr-1.5" />
               Crear grupo
             </Button>
           </div>

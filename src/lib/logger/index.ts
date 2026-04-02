@@ -1,12 +1,13 @@
 import { loggerConfig } from '@/config/logger.config';
 
-type LogLevel = 'error' | 'info' | 'debug' | 'verbose';
+type LogLevel = 'error' | 'warn' | 'info' | 'debug' | 'verbose';
 
 const LOG_LEVEL_VALUES: Record<LogLevel, number> = {
   error: 0,
-  info: 1,
-  debug: 2,
-  verbose: 3,
+  warn: 1,
+  info: 2,
+  debug: 3,
+  verbose: 4,
 };
 
 const CURRENT_LEVEL: LogLevel = loggerConfig.level;
@@ -15,27 +16,42 @@ function shouldLog(level: LogLevel): boolean {
   return LOG_LEVEL_VALUES[level] <= LOG_LEVEL_VALUES[CURRENT_LEVEL];
 }
 
-function formatMessage(level: LogLevel, layer: string, method: string, message: string, data?: unknown): string {
-  const timestamp = new Date().toISOString();
-  const base = `[${timestamp}] [${level.toUpperCase()}] [${layer}] ${method} — ${message}`;
+function formatMessage(level: LogLevel, layer: string, name: string, method: string, message: string, data?: unknown): string {
+  const base = `[${level.charAt(0).toUpperCase()}] [${layer}] ${name}.${method} — ${message}`;
   return data !== undefined ? `${base} | ${JSON.stringify(data)}` : base;
 }
 
-function createLayerLogger(layer: string, level: LogLevel) {
-  return (method: string, message: string, data?: unknown) => {
-    if (!shouldLog(level)) return;
-    const formatted = formatMessage(level, layer, method, message, data);
-    if (level === 'error') {
-      console.error(formatted);
-    } else {
+type ScopedLogger = {
+  (method: string, message: string, data?: unknown): void;
+  error: (method: string, message: string, data?: unknown) => void;
+  warn: (method: string, message: string, data?: unknown) => void;
+};
+
+function createScopedLogger(name: string, layer: string, level: LogLevel): ScopedLogger {
+  const log: ScopedLogger = Object.assign(
+    (method: string, message: string, data?: unknown) => {
+      if (!shouldLog(level)) return;
+      const formatted = formatMessage(level, layer, name, method, message, data);
       console.log(formatted);
+    },
+    {
+      error: (method: string, message: string, data?: unknown) => {
+        if (!shouldLog('error')) return;
+        const formatted = formatMessage('error', 'ERROR', name, method, message, data);
+        console.error(formatted);
+      },
+      warn: (method: string, message: string, data?: unknown) => {
+        if (!shouldLog('warn')) return;
+        const formatted = formatMessage('warn', layer, name, method, message, data);
+        console.warn(formatted);
+      },
     }
-  };
+  );
+  return log;
 }
 
 export const logger = {
-  action: createLayerLogger('ACTION', 'info'),
-  service: createLayerLogger('SERVICE', 'debug'),
-  repo: createLayerLogger('REPOSITORY', 'verbose'),
-  error: createLayerLogger('ERROR', 'error'),
+  repo: (name: string) => createScopedLogger(name, 'REPOSITORY', 'verbose'),
+  service: (name: string) => createScopedLogger(name, 'SERVICE', 'debug'),
+  action: (name: string) => createScopedLogger(name, 'ACTION', 'info'),
 };

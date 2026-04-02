@@ -11,11 +11,13 @@ import type { Group } from '@/entities/group.entity';
 import type { GroupMember } from '@/entities/group-member.entity';
 import type { User } from '@/entities/user.entity';
 
+const log = logger.action('group');
+
 export async function createGroup(
   _prevState: ActionResponse<Group>,
   formData: FormData
 ): Promise<ActionResponse<Group>> {
-  logger.action('createGroup', 'Started', { name: formData.get('name') });
+  log('createGroup', 'Started', { name: formData.get('name') });
 
   const parsed = createGroupSchema.safeParse({
     name: formData.get('name'),
@@ -33,12 +35,12 @@ export async function createGroup(
 
     const groupService = createGroupService(db);
     const group = await groupService.create(parsed.data, user.id);
-    logger.action('createGroup', 'Success', { groupId: group.id });
+    log('createGroup', 'Success', { groupId: group.id });
     revalidatePath('/groups');
     redirect(`/groups/${group.id}`);
   } catch (error) {
     if ((error as { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) throw error;
-    logger.error('createGroup', 'Failed', { error: (error as Error).message });
+    log.error('createGroup', 'Failed', { error: (error as Error).message });
     return { success: false, error: 'Error al crear el grupo' };
   }
 }
@@ -50,7 +52,7 @@ export async function addMemberToGroup(
   const groupId = formData.get('groupId') as string;
   const email = formData.get('email') as string;
 
-  logger.action('addMemberToGroup', 'Started', { groupId });
+  log('addMemberToGroup', 'Started', { groupId });
 
   const parsed = addMemberSchema.safeParse({ groupId, email });
   if (!parsed.success) {
@@ -63,26 +65,32 @@ export async function addMemberToGroup(
     if (!user) return { success: false, error: 'No autenticado' };
 
     const groupService = createGroupService(db);
-    const member = await groupService.addMember(groupId, email, user.id);
-    logger.action('addMemberToGroup', 'Success', { memberId: member.id });
+    const result = await groupService.addMember(groupId, email, user.id);
+    log('addMemberToGroup', 'Success', { memberId: result.member.id, invited: result.invited });
     revalidatePath(`/groups/${groupId}`);
-    return { success: true, data: member };
+    return {
+      success: true,
+      data: result.member,
+      message: result.invited
+        ? `Invitación enviada a ${email}`
+        : 'Miembro agregado correctamente',
+    };
   } catch (error) {
-    logger.error('addMemberToGroup', 'Failed', { error: (error as Error).message });
+    log.error('addMemberToGroup', 'Failed', { error: (error as Error).message });
     return { success: false, error: (error as Error).message };
   }
 }
 
 export async function getGroupMembers(groupId: string): Promise<(GroupMember & { user: User })[]> {
-  logger.action('getGroupMembers', 'Started', { groupId });
+  log('getGroupMembers', 'Started', { groupId });
   try {
     const db = await createClient();
     const groupService = createGroupService(db);
     const members = await groupService.getMembers(groupId);
-    logger.action('getGroupMembers', 'Success', { count: members.length });
+    log('getGroupMembers', 'Success', { count: members.length });
     return members;
   } catch (error) {
-    logger.error('getGroupMembers', 'Failed', { error: (error as Error).message });
+    log.error('getGroupMembers', 'Failed', { error: (error as Error).message });
     return [];
   }
 }

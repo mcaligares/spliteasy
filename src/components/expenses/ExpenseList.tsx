@@ -1,3 +1,4 @@
+import { Receipt } from 'lucide-react';
 import type { Expense } from '@/entities/expense.entity';
 import type { User } from '@/entities/user.entity';
 import { Card } from '@/components/ui/Card';
@@ -17,6 +18,7 @@ export function ExpenseList({ expenses, usersMap, groupId }: ExpenseListProps) {
   if (expenses.length === 0) {
     return (
       <EmptyState
+        icon={Receipt}
         title="Sin gastos aún"
         description="Registrá el primer gasto del grupo."
         action={
@@ -34,14 +36,17 @@ export function ExpenseList({ expenses, usersMap, groupId }: ExpenseListProps) {
         const payer = usersMap[expense.paid_by];
         return (
           <Card key={expense.id} padding={false}>
-            <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-3 px-4 py-3 min-h-[56px]">
+              <div className="shrink-0 w-9 h-9 rounded-full bg-indigo-50 flex items-center justify-center">
+                <Receipt className="h-4 w-4 text-indigo-600" />
+              </div>
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-gray-900 truncate">{expense.description}</p>
                 <p className="text-sm text-gray-500 mt-0.5">
                   Pagó {payer?.name ?? 'Desconocido'} · {formatDate(expense.created_at)}
                 </p>
               </div>
-              <div className="ml-4 shrink-0 text-right">
+              <div className="ml-2 shrink-0 text-right">
                 <p className="font-semibold text-gray-900">{formatCurrency(expense.amount, expense.currency)}</p>
                 <p className="text-xs text-gray-400 capitalize">{expense.split_type === 'equal' ? 'División igual' : expense.split_type}</p>
               </div>

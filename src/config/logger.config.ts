@@ -1,6 +1,6 @@
-type LogLevel = 'error' | 'info' | 'debug' | 'verbose';
+type LogLevel = 'error' | 'warn' | 'info' | 'debug' | 'verbose';
 
-const validLevels: LogLevel[] = ['error', 'info', 'debug', 'verbose'];
+const validLevels: LogLevel[] = ['error', 'warn', 'info', 'debug', 'verbose'];
 
 function getLogLevel(): LogLevel {
   const env = process.env.LOG_LEVEL as LogLevel;

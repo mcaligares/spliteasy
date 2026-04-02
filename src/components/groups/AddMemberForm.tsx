@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import { UserPlus } from 'lucide-react';
 import { addMemberToGroup } from '@/actions/group.actions';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -20,7 +21,9 @@ export function AddMemberForm({ groupId }: AddMemberFormProps) {
   return (
     <form action={action} className="space-y-3">
       {state.error && <Alert type="error" message={state.error} />}
-      {state.success && <Alert type="success" message="Miembro agregado correctamente" />}
+      {state.success && (
+        <Alert type="success" message={state.message ?? 'Miembro agregado correctamente'} />
+      )}
       <input type="hidden" name="groupId" value={groupId} />
       <div className="flex gap-2">
         <Input
@@ -30,7 +33,8 @@ export function AddMemberForm({ groupId }: AddMemberFormProps) {
           className="flex-1"
         />
         <Button type="submit" loading={isPending} size="md">
-          Agregar
+          <UserPlus className="h-4 w-4 sm:mr-1.5" />
+          <span className="hidden sm:inline">Agregar</span>
         </Button>
       </div>
     </form>

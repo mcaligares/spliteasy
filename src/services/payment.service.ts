@@ -6,6 +6,8 @@ import type { Payment } from '@/entities/payment.entity';
 import type { CreatePaymentInput } from '@/lib/validators/payment.schema';
 import { logger } from '@/lib/logger';
 
+const log = logger.service('payment');
+
 export function createPaymentService(db: DbClient) {
   const paymentRepo = createPaymentRepository(db);
   const activityRepo = createActivityLogRepository(db);
@@ -13,7 +15,7 @@ export function createPaymentService(db: DbClient) {
 
   return {
     async create(data: CreatePaymentInput, paidById: string): Promise<Payment> {
-      logger.service('PaymentService.create', 'Validating payment', {
+      log('create', 'Validating payment', {
         groupId: data.group_id,
         amount: data.amount,
       });
@@ -28,7 +30,7 @@ export function createPaymentService(db: DbClient) {
         throw new Error(`El monto supera tu deuda actual de ${debtToPayee.amount}`);
       }
 
-      logger.service('PaymentService.create', 'Validation passed, inserting payment');
+      log('create', 'Validation passed, inserting payment');
 
       const payment = await paymentRepo.insert({
         group_id: data.group_id,
@@ -39,7 +41,7 @@ export function createPaymentService(db: DbClient) {
       });
 
       await balanceService.recalculate(data.group_id);
-      logger.service('PaymentService.create', 'Balances updated');
+      log('create', 'Balances updated');
 
       await activityRepo.insert({
         group_id: data.group_id,
@@ -54,7 +56,7 @@ export function createPaymentService(db: DbClient) {
     },
 
     async getByGroupId(groupId: string): Promise<Payment[]> {
-      logger.service('PaymentService.getByGroupId', 'Fetching payments', { groupId });
+      log('getByGroupId', 'Fetching payments', { groupId });
       return paymentRepo.findByGroupId(groupId);
     },
   };

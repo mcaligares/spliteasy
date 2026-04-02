@@ -1,5 +1,6 @@
-export interface ActionResponse<T = void> {
+export type ActionResponse<T = void> = {
   success: boolean;
   data?: T;
   error?: string;
-}
+  message?: string;
+};

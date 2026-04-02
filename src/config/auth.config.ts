@@ -2,7 +2,6 @@ export const authConfig = {
   redirects: {
     afterLogin: '/dashboard',
     afterLogout: '/login',
-    afterSignup: '/dashboard',
     unauthenticated: '/login',
   },
   session: {

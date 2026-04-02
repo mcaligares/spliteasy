@@ -8,6 +8,8 @@ import type { CreateExpenseInput } from '@/lib/validators/expense.schema';
 import { roundToTwoDecimals } from '@/lib/utils/currency';
 import { logger } from '@/lib/logger';
 
+const log = logger.service('expense');
+
 export function createExpenseService(db: DbClient) {
   const expenseRepo = createExpenseRepository(db);
   const participantRepo = createExpenseParticipantRepository(db);
@@ -16,13 +18,13 @@ export function createExpenseService(db: DbClient) {
 
   return {
     async create(data: CreateExpenseInput, createdBy: string): Promise<Expense> {
-      logger.service('ExpenseService.create', 'Calculating equal split', {
+      log('create', 'Calculating equal split', {
         amount: data.amount,
         participants: data.participants.length,
       });
 
       const amountPerPerson = roundToTwoDecimals(data.amount / data.participants.length);
-      logger.service('ExpenseService.create', 'Split calculated', { amountPerPerson });
+      log('create', 'Split calculated', { amountPerPerson });
 
       const expense = await expenseRepo.insert({
         group_id: data.group_id,
@@ -33,7 +35,7 @@ export function createExpenseService(db: DbClient) {
         split_type: 'equal',
         created_by: createdBy,
       });
-      logger.service('ExpenseService.create', 'Expense inserted, adding participants');
+      log('create', 'Expense inserted, adding participants');
 
       await participantRepo.insertMany(
         data.participants.map((userId) => ({
@@ -42,10 +44,10 @@ export function createExpenseService(db: DbClient) {
           amount_owed: amountPerPerson,
         }))
       );
-      logger.service('ExpenseService.create', 'Participants added, updating balances');
+      log('create', 'Participants added, updating balances');
 
       await balanceService.recalculate(data.group_id);
-      logger.service('ExpenseService.create', 'Balances recalculated');
+      log('create', 'Balances recalculated');
 
       await activityRepo.insert({
         group_id: data.group_id,
@@ -60,12 +62,12 @@ export function createExpenseService(db: DbClient) {
     },
 
     async getByGroupId(groupId: string): Promise<Expense[]> {
-      logger.service('ExpenseService.getByGroupId', 'Fetching expenses', { groupId });
+      log('getByGroupId', 'Fetching expenses', { groupId });
       return expenseRepo.findByGroupId(groupId);
     },
 
     async delete(expenseId: string, groupId: string, userId: string): Promise<void> {
-      logger.service('ExpenseService.delete', 'Deleting expense', { expenseId });
+      log('delete', 'Deleting expense', { expenseId });
 
       await expenseRepo.delete(expenseId);
       await balanceService.recalculate(groupId);

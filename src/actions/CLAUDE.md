@@ -8,4 +8,4 @@ Actions are the **boundary between client and server**. Every exported function 
 - **Try-catch mandatory**: wrap service calls in try-catch.
 - **Error response pattern**: return a response object containing the error and a user-facing message.
 - **Auth check**: verify user authentication via `db.auth.getUser()` before proceeding.
-- **Info logging**: log using `logger.action('functionName', message, data)` — log start, success, and failure.
+- **Info logging**: create a scoped logger at file level with `const log = logger.action('name')`. Log start, success using `log('method', message, data)` and failure using `log.error('method', message, data)`.

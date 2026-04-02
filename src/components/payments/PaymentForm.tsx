@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import Link from 'next/link';
+import { X, Send } from 'lucide-react';
 import { createPayment } from '@/actions/payment.actions';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -51,7 +52,7 @@ export function PaymentForm({ groupId, debts, preselectedUserId, preselectedAmou
           id="paid_to"
           name="paid_to"
           defaultValue={preselectedUserId || ''}
-          className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">Seleccionar persona</option>
           {debts.map(({ user, amount }) => (
@@ -82,16 +83,20 @@ export function PaymentForm({ groupId, debts, preselectedUserId, preselectedAmou
           name="note"
           type="text"
           maxLength={200}
-          className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           placeholder="Transferencia, efectivo, etc."
         />
       </div>
 
       <div className="flex gap-3 pt-2">
         <Link href={`/groups/${groupId}`} className="flex-1">
-          <Button variant="secondary" className="w-full">Cancelar</Button>
+          <Button variant="secondary" className="w-full">
+            <X className="h-4 w-4 mr-1.5" />
+            Cancelar
+          </Button>
         </Link>
         <Button type="submit" loading={isPending} className="flex-1">
+          <Send className="h-4 w-4 mr-1.5" />
           Registrar pago
         </Button>
       </div>

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Plus, TrendingUp, TrendingDown, CheckCircle, Users } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { createGroupService } from '@/services/group.service';
 import { createAuthService } from '@/services/auth.service';
@@ -35,7 +36,10 @@ export default async function GroupsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Mis Grupos</h1>
         <Link href="/groups/new">
-          <Button>Nuevo grupo</Button>
+          <Button>
+            <Plus className="h-4 w-4 mr-1.5" />
+            Nuevo grupo
+          </Button>
         </Link>
       </div>
 
@@ -60,17 +64,22 @@ export default async function GroupsPage() {
                     {group.description && (
                       <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">{group.description}</p>
                     )}
-                    <p className="text-xs text-gray-400 mt-2">{memberCount} miembro{memberCount !== 1 ? 's' : ''}</p>
+                    <div className="flex items-center gap-1 text-xs text-gray-400 mt-2">
+                      <Users className="h-3.5 w-3.5" />
+                      {memberCount} miembro{memberCount !== 1 ? 's' : ''}
+                    </div>
                   </div>
-                  <div className={`text-sm font-medium ml-4 shrink-0 ${
+                  <div className={`flex items-center gap-1 text-sm font-medium ml-4 shrink-0 ${
                     balance.netAmount > 0 ? 'text-green-600' :
                     balance.netAmount < 0 ? 'text-red-600' : 'text-gray-400'
                   }`}>
-                    {balance.netAmount > 0
-                      ? `+${formatCurrency(balance.netAmount)}`
-                      : balance.netAmount < 0
-                      ? `-${formatCurrency(Math.abs(balance.netAmount))}`
-                      : 'Al día'}
+                    {balance.netAmount > 0 ? (
+                      <><TrendingUp className="h-4 w-4" />+{formatCurrency(balance.netAmount)}</>
+                    ) : balance.netAmount < 0 ? (
+                      <><TrendingDown className="h-4 w-4" />-{formatCurrency(Math.abs(balance.netAmount))}</>
+                    ) : (
+                      <><CheckCircle className="h-4 w-4" />Al día</>
+                    )}
                   </div>
                 </div>
               </Card>

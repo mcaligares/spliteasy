@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import Link from 'next/link';
+import { X, Save } from 'lucide-react';
 import { createExpense } from '@/actions/expense.actions';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -52,7 +53,7 @@ export function ExpenseForm({ groupId, members, currentUserId }: ExpenseFormProp
           id="paid_by"
           name="paid_by"
           defaultValue={currentUserId}
-          className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           {members.map((m) => (
             <option key={m.id} value={m.id}>
@@ -67,7 +68,7 @@ export function ExpenseForm({ groupId, members, currentUserId }: ExpenseFormProp
         <p className="text-xs text-gray-500">El monto se divide igual entre los seleccionados</p>
         <div className="space-y-2 border border-gray-200 rounded-lg p-3">
           {members.map((m) => (
-            <label key={m.id} className="flex items-center gap-2 cursor-pointer">
+            <label key={m.id} className="flex items-center gap-2 cursor-pointer min-h-[36px]">
               <input
                 type="checkbox"
                 name="participants"
@@ -85,9 +86,13 @@ export function ExpenseForm({ groupId, members, currentUserId }: ExpenseFormProp
 
       <div className="flex gap-3 pt-2">
         <Link href={`/groups/${groupId}`} className="flex-1">
-          <Button variant="secondary" className="w-full">Cancelar</Button>
+          <Button variant="secondary" className="w-full">
+            <X className="h-4 w-4 mr-1.5" />
+            Cancelar
+          </Button>
         </Link>
         <Button type="submit" loading={isPending} className="flex-1">
+          <Save className="h-4 w-4 mr-1.5" />
           Guardar gasto
         </Button>
       </div>

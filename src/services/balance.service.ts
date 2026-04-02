@@ -10,6 +10,8 @@ import { logger } from '@/lib/logger';
 import type { GroupBalanceWithUsers, UserBalanceSummary } from './types';
 import type { User } from '@/entities/user.entity';
 
+const log = logger.service('balance');
+
 export function createBalanceService(db: DbClient) {
   const balanceRepo = createBalanceRepository(db);
   const expenseRepo = createExpenseRepository(db);
@@ -20,7 +22,7 @@ export function createBalanceService(db: DbClient) {
 
   return {
     async recalculate(groupId: string): Promise<void> {
-      logger.service('BalanceService.recalculate', 'Starting balance recalculation', { groupId });
+      log('recalculate', 'Starting balance recalculation', { groupId });
 
       const [members, expenses, payments] = await Promise.all([
         memberRepo.findByGroupId(groupId),
@@ -28,7 +30,7 @@ export function createBalanceService(db: DbClient) {
         paymentRepo.findByGroupId(groupId),
       ]);
 
-      logger.service('BalanceService.recalculate', 'Fetched data', {
+      log('recalculate', 'Fetched data', {
         members: members.length,
         expenses: expenses.length,
         payments: payments.length,
@@ -58,7 +60,7 @@ export function createBalanceService(db: DbClient) {
         net[payment.paid_by][payment.paid_to] -= payment.amount;
       }
 
-      logger.service('BalanceService.recalculate', 'Computed net balances, upserting');
+      log('recalculate', 'Computed net balances, upserting');
 
       // Clear existing and upsert new balances
       await balanceRepo.deleteByGroupId(groupId);
@@ -75,11 +77,11 @@ export function createBalanceService(db: DbClient) {
       }
       await Promise.all(upsertPromises);
 
-      logger.service('BalanceService.recalculate', 'Balance recalculation complete');
+      log('recalculate', 'Balance recalculation complete');
     },
 
     async getGroupBalances(groupId: string): Promise<GroupBalanceWithUsers[]> {
-      logger.service('BalanceService.getGroupBalances', 'Fetching group balances', { groupId });
+      log('getGroupBalances', 'Fetching group balances', { groupId });
       const balances = await balanceRepo.findByGroupId(groupId);
       const userIds = [...new Set(balances.flatMap((b) => [b.from_user, b.to_user]))];
       const users = await userRepo.findManyByIds(userIds);
@@ -95,7 +97,7 @@ export function createBalanceService(db: DbClient) {
     },
 
     async getUserBalance(groupId: string, userId: string): Promise<UserBalanceSummary> {
-      logger.service('BalanceService.getUserBalance', 'Fetching user balance', { groupId, userId });
+      log('getUserBalance', 'Fetching user balance', { groupId, userId });
       const balances = await balanceRepo.findByGroupId(groupId);
       const userIds = [...new Set(balances.flatMap((b) => [b.from_user, b.to_user]))];
       const users = await userRepo.findManyByIds(userIds);

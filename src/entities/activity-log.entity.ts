@@ -4,6 +4,7 @@ export type ActivityAction =
   | 'expense_deleted'
   | 'payment_created'
   | 'member_joined'
+  | 'member_invited'
   | 'member_left';
 
 export interface ActivityLog {
