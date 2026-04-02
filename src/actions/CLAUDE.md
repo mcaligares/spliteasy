@@ -1,0 +1,11 @@
+# Actions Layer
+
+Actions are the **boundary between client and server**. Every exported function must use the `'use server'` directive.
+
+## Rules
+
+- **Critical-field validation only**: full Zod validation happens on the client side. Actions only validate fields that are critical and would cause a server error (e.g., missing IDs, authentication).
+- **Try-catch mandatory**: wrap service calls in try-catch.
+- **Error response pattern**: return a response object containing the error and a user-facing message.
+- **Auth check**: verify user authentication via `db.auth.getUser()` before proceeding.
+- **Info logging**: log using `logger.action('functionName', message, data)` — log start, success, and failure.
